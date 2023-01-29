@@ -1,0 +1,24 @@
+{
+  "name": "fp-in-ts",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=18.13.0"
+  },
+  "scripts": {
+    "build": "yarn g:build",
+    "clean": "yarn g:clean",
+    "compile": "yarn g:compile",
+    "test": "yarn g:test"
+  },
+  "dependencies": {
+    "fp-ts": "2.13.1",
+    "ulid": "2.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.11.18",
+    "tslib": "2.4.0"
+  },
+  "engineStrict": true
+}

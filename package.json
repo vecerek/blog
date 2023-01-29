@@ -1,0 +1,43 @@
+{
+  "name": "blog",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.13.0"
+  },
+  "scripts": {
+    "build": "yarn clean && yarn compile",
+    "clean": "tsc --build --clean",
+    "compile": "tsc --build",
+    "g:build": "cd $INIT_CWD && yarn run clean && yarn run compile",
+    "g:clean": "cd $INIT_CWD && tsc --build --clean",
+    "g:compile": "cd $INIT_CWD && tsc --build",
+    "g:test": "cd $INIT_CWD && node --test dist",
+    "lint": "eslint packages/**/src --ext .js,.ts --max-warnings=0",
+    "lint:report": "yarn lint --format json --output-file .eslint/report.json",
+    "test": "node --test packages/**/*/dist",
+    "test:prettier": "prettier --check ./packages/**/src/**/*.ts"
+  },
+  "dependencies": {
+    "tslib": "2.4.0"
+  },
+  "devDependencies": {
+    "@types/eslint": "^8",
+    "@types/node": "18.11.18",
+    "@types/prettier": "^2",
+    "@typescript-eslint/eslint-plugin": "5.49.0",
+    "@typescript-eslint/parser": "5.49.0",
+    "eslint": "8.32.0",
+    "eslint-config-prettier": "8.6.0",
+    "husky": "8.0.3",
+    "prettier": "2.8.3",
+    "prettier-plugin-organize-imports": "3.2.2",
+    "prettier-plugin-package": "1.3.0",
+    "pretty-quick": "3.1.3",
+    "typescript": "4.9.4"
+  },
+  "packageManager": "yarn@3.3.1",
+  "workspaces": [
+    "packages/*"
+  ]
+}
