@@ -1,4 +1,4 @@
-import { reader } from "fp-ts";
+import { random as _random, reader } from "fp-ts";
 import { pipe } from "fp-ts/lib/function.js";
 
 interface Random {
@@ -17,3 +17,8 @@ export const chanceButLower: reader.Reader<Env, number> = pipe(
   reader.bind("b", () => reader.asks(nextRandom)),
   reader.map(({ a, b }) => a * b)
 );
+
+// Example usage
+console.log({
+  res: chanceButLower({ random: { next: _random.random } }),
+});
