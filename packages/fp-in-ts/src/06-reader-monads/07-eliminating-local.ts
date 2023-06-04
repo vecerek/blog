@@ -1,135 +1,39 @@
-import { either, option, readerTaskEither, taskEither } from "fp-ts";
-import { flow, pipe } from "fp-ts/lib/function.js";
+import { random as _random, reader } from "fp-ts";
+import { pipe } from "fp-ts/lib/function.js";
 
-class NetworkError {
-  readonly _tag = "NetworkError";
-  constructor(readonly error: Error) {}
+interface Random {
+  next: () => number;
 }
 
-interface Db {
-  query: (
-    sql: string
-  ) => (values: unknown[]) => taskEither.TaskEither<NetworkError, unknown>;
+const chanceButLower: reader.Reader<{ random: Random }, number> = ({
+  random,
+}) => random.next() * random.next();
+
+type Result = "WIN" | "LOSE";
+
+interface SlotMachine {
+  result: (chance: number) => Result;
 }
 
-interface Fetch {
-  (url: RequestInfo, init?: RequestInit): Promise<Response>;
+const predict =
+  (chance: number): reader.Reader<{ slotMachine: SlotMachine }, Result> =>
+  ({ slotMachine }) =>
+    slotMachine.result(chance);
+
+interface Deps {
+  random: Random;
+  slotMachine: SlotMachine;
 }
 
-interface User {
-  id: string;
-  email: string;
-}
+const tryMyLuck: reader.Reader<Deps, Result> = pipe(
+  chanceButLower,
+  reader.chainW(predict)
+);
 
-interface FetchLocalUser {
-  (id: string): readerTaskEither.ReaderTaskEither<
-    { db: Db },
-    NetworkError,
-    option.Option<User>
-  >;
-}
-
-const fetchLocalUser: FetchLocalUser =
-  (id) =>
-  ({ db }) =>
-    pipe(
-      [id],
-      db.query("SELECT * FROM local_users WHERE id = ?"),
-      taskEither.map((result) =>
-        pipe(
-          // this casting to User breaks end-to-end type-safety; ignore it for now
-          // we'll cover runtime type-systems such as io-ts to solve this problem in another blog post
-          result instanceof Array && result.length > 0
-            ? (result[0] as User)
-            : null,
-          option.fromNullable
-        )
-      )
-    );
-
-class UserNotFoundError {
-  readonly _tag = "UserNotFoundError";
-  constructor(readonly error: Error) {}
-}
-
-class UnexpectedFetchUserError {
-  readonly _tag = "UnexpectedFetchUserError";
-  constructor(readonly error: Error) {}
-}
-
-type FetchExternalUserError =
-  | UserNotFoundError
-  | NetworkError
-  | UnexpectedFetchUserError;
-
-interface FetchExternalUser {
-  (id: string): readerTaskEither.ReaderTaskEither<
-    { fetch: Fetch },
-    FetchExternalUserError,
-    User
-  >;
-}
-
-const fetchExternalUser: FetchExternalUser =
-  (id) =>
-  ({ fetch }) =>
-    pipe(
-      taskEither.tryCatch(
-        () => fetch(`/api/users/${id}`),
-        flow(either.toError, (err) => new NetworkError(err))
-      ),
-      taskEither.filterOrElseW(
-        (response) => response.status !== 404,
-        () => new UserNotFoundError(new Error(`User ${id} not found`))
-      ),
-      taskEither.filterOrElseW(
-        (response) => response.ok,
-        (response) =>
-          new UnexpectedFetchUserError(
-            new Error(`Received response with status code ${response.status}`)
-          )
-      ),
-      taskEither.filterOrElseW(
-        (response) =>
-          response.headers.get("Content-Type") === "application/json",
-        (response) =>
-          new UnexpectedFetchUserError(
-            new Error(
-              `Request content-type header is: ${response.headers.get(
-                "Content-Type"
-              )}`
-            )
-          )
-      ),
-      taskEither.chainW((response) =>
-        taskEither.tryCatch(
-          // this casting to User breaks end-to-end type-safety; ignore it for now
-          // we'll cover runtime type-systems such as io-ts to solve this problem in another blog post
-          () => response.json() as Promise<User>,
-          flow(either.toError, (err) => new UnexpectedFetchUserError(err))
-        )
-      )
-    );
-
-interface FetchUser {
-  (id: string): readerTaskEither.ReaderTaskEither<
-    { db: Db; fetch: Fetch },
-    FetchExternalUserError,
-    User
-  >;
-}
-
-export const fetchUser: FetchUser = (id) =>
-  pipe(
-    fetchLocalUser(id),
-    readerTaskEither.chainW(
-      option.match(
-        () =>
-          readerTaskEither.left(
-            new UserNotFoundError(new Error(`User ${id} not found`))
-          ),
-        (user) => readerTaskEither.right(user)
-      )
-    ),
-    readerTaskEither.orElseW(() => fetchExternalUser(id))
-  );
+// Example usage
+console.log({
+  result: tryMyLuck({
+    random: { next: _random.random },
+    slotMachine: { result: (chance) => (chance >= 0.99 ? "WIN" : "LOSE") },
+  }),
+});

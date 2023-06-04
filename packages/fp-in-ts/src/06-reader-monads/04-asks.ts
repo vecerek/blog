@@ -20,5 +20,5 @@ export const chanceButLower: reader.Reader<Env, number> = pipe(
 
 // Example usage
 console.log({
-  res: chanceButLower({ random: { next: _random.random } }),
+  result: chanceButLower({ random: { next: _random.random } }),
 });
