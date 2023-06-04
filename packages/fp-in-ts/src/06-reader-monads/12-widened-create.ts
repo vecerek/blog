@@ -4,7 +4,7 @@ import type * as db from "./db.js";
 
 export interface Create {
   (input: unknown): readerTaskEither.ReaderTaskEither<
-    project.DbEnv & { db: db.Service },
+    project.DbEnv,
     | db.WithTransactionError
     | db.QueryError
     | project.ParseInputError
