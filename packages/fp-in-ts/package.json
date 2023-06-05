@@ -4,7 +4,7 @@
   "license": "MIT",
   "type": "module",
   "engines": {
-    "node": ">=18.13.0"
+    "node": ">=20.2.0"
   },
   "scripts": {
     "build": "yarn g:build",
@@ -13,12 +13,12 @@
     "test": "yarn g:test"
   },
   "dependencies": {
-    "fp-ts": "2.13.1",
+    "fp-ts": "2.16.0",
+    "tslib": "2.5.3",
     "ulid": "2.3.0"
   },
   "devDependencies": {
-    "@types/node": "18.11.18",
-    "tslib": "2.4.0"
+    "@types/node": "20.2.5"
   },
   "engineStrict": true
 }

@@ -27,8 +27,8 @@ gen_enforced_dependency(WorkspaceCwd, 'tslib', 'range', 'dependencies') :-
   % Only proceed if the workspace doesn't already depend on tslib
     \+ workspace_has_dependency(WorkspaceCwd, 'tslib', _, _).
 
-% This rule will enforce that all packages must have an engines.node field of >=18.13.0
-gen_enforced_field(WorkspaceCwd, 'engines.node', '>=18.13.0').
+% This rule will enforce that all packages must have an engines.node field of >=20.2.0
+gen_enforced_field(WorkspaceCwd, 'engines.node', '>=20.2.0').
 
 gen_enforced_field(WorkspaceCwd, 'version', WorkspaceVersion2) :-
   % Iterates over the version field from all workspaces
